@@ -17,7 +17,7 @@
 #define VERSION "0"
 
 int stackPointer = 0;
-int stack[128];
+int stack[10000];
 
 //Main
 void push(int a){
@@ -147,6 +147,28 @@ void execute(int p){
         programm_exe(code3);
     }
 
+}
+
+void readExecuteFile(string path){
+    FILE *pF = fopen(path, "r");
+    char buffer[255];
+    unsigned int code[20];
+
+    int i = 0;
+    if(pF == NULL){
+        printf("Wrong file Path. Couldnt open File.")
+    } else {
+        while(fgets(buffer, 255, pF) != NULL){
+            //read...
+            code[i] = malloc(strlen(buffer) + 1);
+            strcpy(code[i], buffer);
+            size_t fread(buffer, 20, 5, pF);
+            ++i;
+        }
+    }
+
+
+    fclose(pF);
 }
 
 int main(int argc, char* argv[]) {
