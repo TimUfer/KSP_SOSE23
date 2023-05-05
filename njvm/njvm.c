@@ -151,24 +151,28 @@ void execute(int p){
 
 void readExecuteFile(string path){
     FILE *pF = fopen(path, "r");
-    char buffer[255];
+    unsigned int buffer[255];
     unsigned int code[20];
 
     int i = 0;
     if(pF == NULL){
         printf("Wrong file Path. Couldnt open File.")
     } else {
-        while(fgets(buffer, 255, pF) != NULL){
+        /*while(fgets(buffer, 255, pF) != NULL){
             //read...
             code[i] = malloc(strlen(buffer) + 1);
             strcpy(code[i], buffer);
             size_t fread(buffer, 20, 5, pF);
             ++i;
-        }
+        }*/
+        read_len = fread(buffer, 1,7,pF);
+        printf(buffer[1],buffer[3]buffer[5]);
     }
 
+    if(fclose(pF) != 0){
+        perror("ERROR while closing")
+    }
 
-    fclose(pF);
 }
 
 int main(int argc, char* argv[]) {
