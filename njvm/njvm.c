@@ -92,7 +92,7 @@ void executeOP(unsigned int opc){
     }
 }
 
-unsigned int code1[] = {
+/*unsigned int code1[] = {
         (PUSHC << 24) | IMMEDIATE(3),
         (PUSHC << 24) | IMMEDIATE(4),
         (ADD << 24),
@@ -124,12 +124,15 @@ unsigned int code3[] = {
         (PUSHC << 24) | IMMEDIATE('\n'),
         (WRCHR << 24),
         (HALT << 24)
-};
+};*/
+
+// executes the op code given in the *prog parameter
 void programm_exe(/*int codeNum,*/ const unsigned int *prog){
     unsigned int programmCounter = 0;
     unsigned int oc = 166;
     int ins;
 
+    // the while loop executes the op code until it reaches 0 aka HALT
     while(oc != HALT) {
         ins = prog[programmCounter];
         programmCounter = programmCounter + 1;
@@ -138,7 +141,7 @@ void programm_exe(/*int codeNum,*/ const unsigned int *prog){
     }
 }
 
-void execute(int p){
+/*void execute(int p){
     if(p == 1){
         programm_exe(code1);
     } else if(p == 2){
@@ -147,27 +150,35 @@ void execute(int p){
         programm_exe(code3);
     }
 
-}
+}*/
 
+//reads the path and saves the values in the "code" array. elements gives the value of lines which you want to read.
 void readExecuteFile(char path[], int elements){
     FILE *pF = fopen(path, "rb");
+    // +4 Because of the "bin head from ninja". the actual values start at the 5th position
     elements = elements+4;
     size_t read_len;
     unsigned int buffer[250];
+
     if(pF == NULL){
         printf("Wrong file Path. Couldnt open File.");
     } else {
+        // reading the file to the buffer array
         read_len = fread(buffer, sizeof(unsigned int), elements, pF);
+
         if (read_len != elements) {
             printf("Error reading file.\n");
             exit(0);
         }
+
         if(fclose(pF) != 0){
             perror("ERROR while closing");
         }
+
         printf("Elements read: %zu\n", read_len);
 
         for(int k = 4; k< elements; ++k){
+            // -4 because you don't want the "ninja bin head" in the code
             code[k-4] = buffer[k];
         }
     }
