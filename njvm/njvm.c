@@ -18,7 +18,7 @@
 
 int stackPointer = 0;
 int stack[10000];
-
+unsigned int code[100];
 //Main
 void push(int a){
     stack[stackPointer] = a;
@@ -149,25 +149,28 @@ void execute(int p){
 
 }
 
-void readExecuteFile(char path[]){
+void readExecuteFile(char path[], int elements){
     FILE *pF = fopen(path, "rb");
+    elements = elements+4;
     size_t read_len;
     unsigned int buffer[250];
     if(pF == NULL){
         printf("Wrong file Path. Couldnt open File.");
     } else {
-        read_len = fread(buffer, sizeof(unsigned int), 7, pF);
-        if (read_len != 7) {
+        read_len = fread(buffer, sizeof(unsigned int), elements, pF);
+        if (read_len != elements) {
             printf("Error reading file.\n");
-        } else {
-            //printf("%u %u %u %u %u %u %u %u\n", buffer[0],buffer[1], buffer[2], buffer[3],  buffer[4], buffer[5], buffer[6], buffer[7]);
+            exit(0);
+        }
+        if(fclose(pF) != 0){
+            perror("ERROR while closing");
+        }
+        printf("Elements read: %zu\n", read_len);
+
+        for(int k = 4; k< elements; ++k){
+            code[k-4] = buffer[k];
         }
     }
-
-    if(fclose(pF) != 0){
-        perror("ERROR while closing");
-    }
-    printf("Elements read: %zu\n", read_len);
 
 }
 
@@ -185,8 +188,8 @@ int main(int argc, char* argv[]) {
         }
     } else{
         printf("Ninja Virtual Machine started\n");
-        //execute(3);
-        readExecuteFile("prog/prog_1.bin");
+        readExecuteFile("prog/prog_1.bin", 7);
+        programm_exe(code);
         printf("Ninja Virtual Machine stopped\n");
     }
     return 0;
