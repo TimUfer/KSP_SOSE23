@@ -149,28 +149,24 @@ void execute(int p){
 
 }
 
-void readExecuteFile(string path){
-    FILE *pF = fopen(path, "r");
+void readExecuteFile(char path[]){
+    FILE *pF = fopen(path, "rb");
     unsigned int buffer[255];
-    unsigned int code[20];
 
     int i = 0;
     if(pF == NULL){
-        printf("Wrong file Path. Couldnt open File.")
+        printf("Wrong file Path. Couldnt open File.");
     } else {
-        /*while(fgets(buffer, 255, pF) != NULL){
-            //read...
-            code[i] = malloc(strlen(buffer) + 1);
-            strcpy(code[i], buffer);
-            size_t fread(buffer, 20, 5, pF);
-            ++i;
-        }*/
-        read_len = fread(buffer, 1,7,pF);
-        printf(buffer[1],buffer[3]buffer[5]);
+        size_t read_len = fread(buffer, sizeof(unsigned int), 7, pF);
+        if (read_len != 7) {
+            printf("Error reading file.\n");
+        } else {
+            printf("%u %u %u %u %u %u %u %u\n", buffer[0],buffer[1], buffer[2], buffer[3],  buffer[4], buffer[5], buffer[6], buffer[7]);
+        }
     }
 
     if(fclose(pF) != 0){
-        perror("ERROR while closing")
+        perror("ERROR while closing");
     }
 
 }
@@ -189,7 +185,8 @@ int main(int argc, char* argv[]) {
         }
     } else{
         printf("Ninja Virtual Machine started\n");
-        execute(3);
+        //execute(3);
+        readExecuteFile("prog/prog_1.bin");
         printf("Ninja Virtual Machine stopped\n");
     }
     return 0;
