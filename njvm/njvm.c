@@ -151,23 +151,23 @@ void execute(int p){
 
 void readExecuteFile(char path[]){
     FILE *pF = fopen(path, "rb");
-    unsigned int buffer[255];
-
-    int i = 0;
+    size_t read_len;
+    unsigned int buffer[250];
     if(pF == NULL){
         printf("Wrong file Path. Couldnt open File.");
     } else {
-        size_t read_len = fread(buffer, sizeof(unsigned int), 7, pF);
+        read_len = fread(buffer, sizeof(unsigned int), 7, pF);
         if (read_len != 7) {
             printf("Error reading file.\n");
         } else {
-            printf("%u %u %u %u %u %u %u %u\n", buffer[0],buffer[1], buffer[2], buffer[3],  buffer[4], buffer[5], buffer[6], buffer[7]);
+            //printf("%u %u %u %u %u %u %u %u\n", buffer[0],buffer[1], buffer[2], buffer[3],  buffer[4], buffer[5], buffer[6], buffer[7]);
         }
     }
 
     if(fclose(pF) != 0){
         perror("ERROR while closing");
     }
+    printf("Elements read: %zu\n", read_len);
 
 }
 
