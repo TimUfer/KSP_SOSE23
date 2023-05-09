@@ -12,13 +12,19 @@
 #define WRINT 8
 #define RDCHR 9
 #define WRCHR 10
+#define PUSHG 11
+#define POPG 12
+#define ASF 13
+#define RSF 14
+#define PUSHL 15
+#define POPL 16
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
 
 int stackPointer = 0;
 int stack[10000];
-unsigned int code[100];
+unsigned int* code;
 int lines;
 //Main
 void push(int a){
@@ -140,6 +146,7 @@ void programm_exe(/*int codeNum,*/ const unsigned int *prog){
         oc = prog[programmCounter] >> 24;
         executeOP(ins);
     }
+    free(code);
 }
 
 /*void execute(int p){
@@ -177,7 +184,8 @@ void readElements(char path[]) {
 
 //reads the path and saves the values in the "code" array. elements gives the value of lines which you want to read.
 void readExecuteFile(char path[]){
-    readElements("prog/prog_1.bin");
+    readElements(path);
+    code = (unsigned int*) malloc(lines * sizeof(unsigned int));
     FILE *pF = fopen(path, "rb");
     // +4 Because of the "bin head from ninja". the actual values start at the 5th position
 
@@ -224,9 +232,7 @@ int main(int argc, char* argv[]) {
         }
     } else{
         printf("Ninja Virtual Machine started\n");
-
         readExecuteFile("prog/prog_1.bin");
-        //readExecuteFile2("prog/prog_1.bin");
         programm_exe(code);
         printf("Ninja Virtual Machine stopped\n");
     }
