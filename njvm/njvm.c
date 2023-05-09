@@ -19,6 +19,7 @@
 int stackPointer = 0;
 int stack[10000];
 unsigned int code[100];
+int lines;
 //Main
 void push(int a){
     stack[stackPointer] = a;
@@ -151,12 +152,29 @@ void programm_exe(/*int codeNum,*/ const unsigned int *prog){
     }
 
 }*/
+void readElements(char path[]) {
+    FILE *p = fopen(path, "rb");
+    int line_number = 1;
+    int elements[4];
+
+    if (p == NULL) {
+        printf("Wrong file Path. Couldnt open File.");
+    } else {
+        // read the file line by line
+        int read_len = fread(elements, sizeof(unsigned int), 4, p);
+    }
+    fclose(p);
+    printf("actual asm lines: %u\n",elements[2]);
+    lines = elements[2];
+}
 
 //reads the path and saves the values in the "code" array. elements gives the value of lines which you want to read.
-void readExecuteFile(char path[], int elements){
+void readExecuteFile(char path[]){
+    readElements("prog/prog_1.bin");
     FILE *pF = fopen(path, "rb");
     // +4 Because of the "bin head from ninja". the actual values start at the 5th position
-    elements = elements+4;
+
+    int elements = lines+4;
     size_t read_len;
     unsigned int buffer[250];
 
@@ -168,7 +186,7 @@ void readExecuteFile(char path[], int elements){
 
         if (read_len != elements) {
             printf("Error reading file.\n");
-            exit(0);
+            exit(1);
         }
 
         if(fclose(pF) != 0){
@@ -199,7 +217,9 @@ int main(int argc, char* argv[]) {
         }
     } else{
         printf("Ninja Virtual Machine started\n");
-        readExecuteFile("prog/prog_1.bin", 7);
+
+        readExecuteFile("prog/prog_1.bin");
+        //readExecuteFile2("prog/prog_1.bin");
         programm_exe(code);
         printf("Ninja Virtual Machine stopped\n");
     }
