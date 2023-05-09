@@ -154,16 +154,23 @@ void programm_exe(/*int codeNum,*/ const unsigned int *prog){
 }*/
 void readElements(char path[]) {
     FILE *p = fopen(path, "rb");
-    int line_number = 1;
     int elements[4];
+    int read_len;
 
     if (p == NULL) {
         printf("Wrong file Path. Couldnt open File.");
     } else {
         // read the file line by line
-        int read_len = fread(elements, sizeof(unsigned int), 4, p);
+        read_len = fread(elements, sizeof(unsigned int), 4, p);
     }
-    fclose(p);
+    if (read_len != 4) {
+        printf("Error reading file.\n");
+        exit(1);
+    }
+
+    if(fclose(p) != 0){
+        perror("ERROR while closing");
+    }
     printf("actual asm lines: %u\n",elements[2]);
     lines = elements[2];
 }
