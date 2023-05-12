@@ -126,6 +126,54 @@ void executeOP(unsigned int opc){
         case POPL:
             stack[input] = pop();
             break;
+        case EQ:
+            int temp1 = pop();
+            if(temp1 == pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
+        case NE:
+            int temp1 = pop();
+            if(temp1 != pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
+        case LT:
+            int temp1 = pop();
+            if(temp1 < pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
+        case LE:
+            int temp1 = pop();
+            if(temp1 <= pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
+        case GT:
+            int temp1 = pop();
+            if(temp1 > pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
+        case GE:
+            int temp1 = pop();
+            if(temp1 >= pop()){
+                push(1);
+            } else {
+                push(0);
+            }
+            break;
         default:
             break;
     }
@@ -166,7 +214,7 @@ unsigned int code3[] = {
 };*/
 
 // executes the op code given in the *prog parameter
-void programm_exe(/*int codeNum,*/ const unsigned int *prog){
+void programm_exe(const unsigned int *prog){
     unsigned int programmCounter = 0;
     unsigned int oc = 166;
     int ins;
