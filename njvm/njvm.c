@@ -18,12 +18,23 @@
 #define RSF 14
 #define PUSHL 15
 #define POPL 16
+#define EQ 17
+#define NE 18
+#define LT 19
+#define LE 20
+#define GT 21
+#define GE 22
+#define JMP 23
+#define BRF 24
+#define BRT 25
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
 
 int stackPointer = 0;
+int framePointer = 0;
 int stack[10000];
+int sda[50];
 unsigned int* code;
 int lines;
 //Main
@@ -93,6 +104,27 @@ void executeOP(unsigned int opc){
         }
         case WRCHR:
             printf("%c", pop());
+            break;
+        case PUSHG:
+            push(sda[input]);
+            break;
+        case POPG:
+            sda[input] = pop();
+            break;
+        case ASF:
+            push(framePointer);
+            framePointer = stackPointer;
+            stackPointer = stackPointer + input;
+            break;
+        case RSF:
+            stackPointer = framePointer;
+            framePointer = pop();
+            break;
+        case PUSHL:
+            push(stack[framePointer + input]);
+            break;
+        case POPL:
+            stack[input] = pop();
             break;
         default:
             break;
