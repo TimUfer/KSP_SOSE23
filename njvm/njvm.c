@@ -31,6 +31,7 @@
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
 
+int programmCounter = 0;
 int stackPointer = 0;
 int framePointer = 0;
 int stack[10000];
@@ -94,7 +95,7 @@ void executeOP(unsigned int opc){
             break;
         }
         case WRINT:
-            printf("%u", pop());
+            printf("%d", pop());
             break;
         case RDCHR: {
             char input;
@@ -126,7 +127,7 @@ void executeOP(unsigned int opc){
         case POPL:
             stack[input] = pop();
             break;
-        case EQ:
+        case EQ: {
             int temp1 = pop();
             if(temp1 == pop()){
                 push(1);
@@ -134,31 +135,35 @@ void executeOP(unsigned int opc){
                 push(0);
             }
             break;
-        case NE:
-            int temp1 = pop();
-            if(temp1 != pop()){
+        }
+        case NE: {
+            int temp2 = pop();
+            if(temp2 != pop()){
                 push(1);
             } else {
                 push(0);
             }
             break;
-        case LT:
-            int temp1 = pop();
-            if(temp1 < pop()){
+        }
+        case LT: {
+            int temp3 = pop();
+            if(temp3 < pop()){
                 push(1);
             } else {
                 push(0);
             }
             break;
-        case LE:
-            int temp1 = pop();
-            if(temp1 <= pop()){
+        }
+        case LE: {
+            int temp4 = pop();
+            if(temp4 <= pop()){
                 push(1);
             } else {
                 push(0);
             }
             break;
-        case GT:
+        }
+        case GT: {
             int temp1 = pop();
             if(temp1 > pop()){
                 push(1);
@@ -166,7 +171,8 @@ void executeOP(unsigned int opc){
                 push(0);
             }
             break;
-        case GE:
+        }
+        case GE: {
             int temp1 = pop();
             if(temp1 >= pop()){
                 push(1);
@@ -174,6 +180,15 @@ void executeOP(unsigned int opc){
                 push(0);
             }
             break;
+        }
+        case JMP:
+            programmCounter = input;
+            break;
+        case BRF:
+            break;
+        case BFT:
+            break;
+
         default:
             break;
     }
@@ -215,7 +230,6 @@ unsigned int code3[] = {
 
 // executes the op code given in the *prog parameter
 void programm_exe(const unsigned int *prog){
-    unsigned int programmCounter = 0;
     unsigned int oc = 166;
     int ins;
 
