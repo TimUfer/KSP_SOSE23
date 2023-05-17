@@ -186,7 +186,7 @@ void executeOP(unsigned int opc){
             break;
         case BRF:
             break;
-        case BFT:
+        case BRT:
             break;
 
         default:
@@ -322,13 +322,11 @@ int main(int argc, char* argv[]) {
             printf("    --help       shows help and exit\n");
             exit(0);
         } else{
-            printf( "unknown command line argument %s, try './njvm --help' \n", argv[1]);
+            printf("Ninja Virtual Machine started\n");
+            readExecuteFile(argv[1]);
+            programm_exe(code);
+            printf("Ninja Virtual Machine stopped\n");
         }
-    } else{
-        printf("Ninja Virtual Machine started\n");
-        readExecuteFile("prog/prog_1.bin");
-        programm_exe(code);
-        printf("Ninja Virtual Machine stopped\n");
     }
     return 0;
 }
