@@ -27,6 +27,12 @@
 #define JMP 23
 #define BRF 24
 #define BRT 25
+#define CALL 26
+#define RET 27
+#define DROP 28
+#define PUSHR 29
+#define POPR 30
+#define DUP 31
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
@@ -36,6 +42,7 @@ int stackPointer = 0;
 int framePointer = 0;
 int stack[10000];
 int sda[50];
+int rvr;
 unsigned int* code;
 int lines;
 //Main
@@ -194,6 +201,33 @@ void executeOP(unsigned int opc){
                 programmCounter = input;
             }
             break;
+        case CALL: {
+            int ra = programmCounter + 1; // vielleicht nur int ra = programmCounter;
+            push(ra);
+            programmCounter = input;
+            break;
+        }
+        case RET:
+            programmCounter = pop();
+            break;
+        case DROP:
+            for(int i = 0; i < input; ++i){
+                stack[programmCounter -i] = 0;
+            }
+            programmCounter = programmCounter - input;
+            break;
+        case PUSHR:
+            push(rvr);
+            break;
+        case POPR:
+            rvr = pop();
+            break;
+        case DUP:{
+            int dup = pop();
+            push(dup);
+            push(dup);
+            break;
+        }
         default:
             break;
     }
