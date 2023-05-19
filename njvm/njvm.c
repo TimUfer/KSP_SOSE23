@@ -185,10 +185,15 @@ void executeOP(unsigned int opc){
             programmCounter = input;
             break;
         case BRF:
+            if(pop() == 0){
+                programmCounter = input;
+            }
             break;
         case BRT:
+            if(pop() == 1){
+                programmCounter = input;
+            }
             break;
-
         default:
             break;
     }
