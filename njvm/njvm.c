@@ -80,6 +80,7 @@ void executeOP(unsigned int opc){
         case SUB: {
             int t = pop();
             push(pop() - t);
+            break;
         }
         case MUL:
             push(pop() * pop());
@@ -87,23 +88,28 @@ void executeOP(unsigned int opc){
         case DIV: {
             int t = pop();
             push(pop() / t);
+            break;
         }
         case MOD: {
             int t = pop();
             push(pop() % t);
+            break;
         }
         case RDINT: {
             int input;
             scanf("%d", &input);
             push(input);
+            break;
         }
-        case WRINT:
+        case WRINT: {
             printf("%d", pop());
             break;
+        }
         case RDCHR: {
             char input;
             scanf("%c", &input);
             push(input);
+            break;
         }
         case WRCHR:
             printf("%c", pop());
@@ -120,6 +126,7 @@ void executeOP(unsigned int opc){
             stackPointer = stackPointer + input;
             break;
         case RSF:
+
             stackPointer = framePointer;
             framePointer = pop();
             break;
@@ -136,6 +143,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case NE: {
             int temp2 = pop();
@@ -144,6 +152,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case LT: {
             int temp3 = pop();
@@ -152,6 +161,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case LE: {
             int temp4 = pop();
@@ -160,6 +170,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case GT: {
             int temp1 = pop();
@@ -168,6 +179,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case GE: {
             int temp1 = pop();
@@ -176,6 +188,7 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
+            break;
         }
         case JMP:
             programmCounter = input;
@@ -193,18 +206,22 @@ void executeOP(unsigned int opc){
         case CALL: {
             push(programmCounter);
             programmCounter = input;
+            break;
         }
-        case RET:
+        case RET: {
             programmCounter = pop();
             break;
+        }
         case DROP: {
             for (int i = 0; i < input; ++i) {
                 pop();
             }
+            break;
         }
-        case PUSHR:
+        case PUSHR: {
             push(rvr);
             break;
+        }
         case POPR:
             rvr = pop();
             break;
@@ -258,14 +275,10 @@ void programm_exe(const unsigned int *prog){
     int ins;
     // the while loop executes the op code until it reaches 0 aka HALT
     while(oc != HALT) {
-
-
         ins = prog[programmCounter];
-        programmCounter = programmCounter + 1;
         oc = prog[programmCounter] >> 24;
+        programmCounter = programmCounter + 1;
         executeOP(ins);
-
-
     }
     free(code);
 }
@@ -313,6 +326,7 @@ void readExecuteFile(char path[]){
     size_t read_len;
     unsigned int buffer[250];
 
+
     if(pF == NULL){
         printf("Wrong file Path. Couldnt open File.");
     } else {
@@ -331,6 +345,9 @@ void readExecuteFile(char path[]){
         for(int k = 4; k< elements; ++k){
             // -4 because you don't want the "ninja bin head" in the code
             code[k-4] = buffer[k];
+        }
+        for (int i = 0; i < elements; i++) {
+            //printf("%p --> %x\n", &code[i], code[i]);
         }
     }
 
