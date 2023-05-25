@@ -80,7 +80,6 @@ void executeOP(unsigned int opc){
         case SUB: {
             int t = pop();
             push(pop() - t);
-            break;
         }
         case MUL:
             push(pop() * pop());
@@ -88,18 +87,15 @@ void executeOP(unsigned int opc){
         case DIV: {
             int t = pop();
             push(pop() / t);
-            break;
         }
         case MOD: {
             int t = pop();
             push(pop() % t);
-            break;
         }
         case RDINT: {
             int input;
             scanf("%d", &input);
             push(input);
-            break;
         }
         case WRINT:
             printf("%d", pop());
@@ -108,7 +104,6 @@ void executeOP(unsigned int opc){
             char input;
             scanf("%c", &input);
             push(input);
-            break;
         }
         case WRCHR:
             printf("%c", pop());
@@ -132,7 +127,7 @@ void executeOP(unsigned int opc){
             push(stack[framePointer + input]);
             break;
         case POPL:
-            stack[input] = pop();
+            stack[framePointer + input] = pop();
             break;
         case EQ: {
             int temp1 = pop();
@@ -141,7 +136,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case NE: {
             int temp2 = pop();
@@ -150,7 +144,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case LT: {
             int temp3 = pop();
@@ -159,7 +152,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case LE: {
             int temp4 = pop();
@@ -168,7 +160,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case GT: {
             int temp1 = pop();
@@ -177,7 +168,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case GE: {
             int temp1 = pop();
@@ -186,7 +176,6 @@ void executeOP(unsigned int opc){
             } else {
                 push(0);
             }
-            break;
         }
         case JMP:
             programmCounter = input;
@@ -202,20 +191,17 @@ void executeOP(unsigned int opc){
             }
             break;
         case CALL: {
-            int ra = programmCounter + 1; // vielleicht nur int ra = programmCounter;
-            push(ra);
+            push(programmCounter);
             programmCounter = input;
-            break;
         }
         case RET:
             programmCounter = pop();
             break;
-        case DROP:
-            for(int i = 0; i < input; ++i){
-                stack[programmCounter -i] = 0;
+        case DROP: {
+            for (int i = 0; i < input; ++i) {
+                pop();
             }
-            programmCounter = programmCounter - input;
-            break;
+        }
         case PUSHR:
             push(rvr);
             break;
@@ -226,7 +212,6 @@ void executeOP(unsigned int opc){
             int dup = pop();
             push(dup);
             push(dup);
-            break;
         }
         default:
             break;
@@ -269,15 +254,18 @@ unsigned int code3[] = {
 
 // executes the op code given in the *prog parameter
 void programm_exe(const unsigned int *prog){
-    unsigned int oc = 166;
+    unsigned int oc = 42;
     int ins;
-
     // the while loop executes the op code until it reaches 0 aka HALT
     while(oc != HALT) {
+
+
         ins = prog[programmCounter];
         programmCounter = programmCounter + 1;
         oc = prog[programmCounter] >> 24;
         executeOP(ins);
+
+
     }
     free(code);
 }
@@ -311,7 +299,6 @@ void readElements(char path[]) {
     if(fclose(p) != 0){
         perror("ERROR while closing");
     }
-    printf("actual asm lines: %u\n",elements[2]);
     lines = elements[2];
 }
 
@@ -340,8 +327,6 @@ void readExecuteFile(char path[]){
         if(fclose(pF) != 0){
             perror("ERROR while closing");
         }
-
-        printf("Elements read: %zu\n", read_len);
 
         for(int k = 4; k< elements; ++k){
             // -4 because you don't want the "ninja bin head" in the code
