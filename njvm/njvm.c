@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
@@ -36,17 +37,50 @@
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
+#define StackSize 10000
+
+typedef int Object;
+typedef struct {
+    unsigned int size;
+    unsigned char data[1];
+} *ObjRef;
+typedef struct {
+    bool isObjRef;
+    union {
+        ObjRef objref;
+        int number;
+    } u;
+} StackSlot;
+StackSlot stack[StackSize];
+
+size_t sda_size = number_global_vars * sizeof(ObjRef);
+ObjRef **sda = malloc(sda_size);
 
 int programmCounter = 0;
 int stackPointer = 0;
 int framePointer = 0;
-int stack[10000];
-int sda[50];
-int rvr;
+//int stack[StackSize];
+//int sda[50];
+//int rvr;
+ObjRef rvr;
 unsigned int* code;
 int lines;
 //Main
-void push(int a){
+
+ObjRef createObjRef(unsigned int payloadSize) {
+    unsigned int objSize = sizeof(unsigned int) + payloadSize;
+    ObjRef obj = (ObjRef)malloc(objSize);
+
+    if (obj == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    obj->size = payloadSize;
+    return obj;
+}
+
+void push(ObjRef a){
     stack[stackPointer] = a;
     stackPointer++;
 }
@@ -71,20 +105,24 @@ void executeOP(unsigned int opc){
     unsigned int opcode = opc >> 24;
     int input = SIGN_EXTEND(opc & 0x00FFFFFF);
     switch (opcode) {
-        case PUSHC:
+        case PUSHC: {
             push(input);
             break;
-        case ADD:
-            push(pop()+pop());
+        }
+
+        case ADD: {
+            push(pop() + pop());
             break;
+        }
         case SUB: {
             int t = pop();
             push(pop() - t);
             break;
         }
-        case MUL:
+        case MUL: {
             push(pop() * pop());
             break;
+        }
         case DIV: {
             int t = pop();
             push(pop() / t);
@@ -96,9 +134,10 @@ void executeOP(unsigned int opc){
             break;
         }
         case RDINT: {
-            int input;
-            scanf("%d", &input);
-            push(input);
+            int in;
+            scanf("%d", &in);
+            push(in);
+            printf("read int");
             break;
         }
         case WRINT: {
@@ -106,39 +145,46 @@ void executeOP(unsigned int opc){
             break;
         }
         case RDCHR: {
-            char input;
-            scanf("%c", &input);
-            push(input);
+            char in;
+            scanf("%c", &in);
+            push(in);
             break;
         }
-        case WRCHR:
+        case WRCHR: {
             printf("%c", pop());
             break;
-        case PUSHG:
+        }
+        case PUSHG: {
             push(sda[input]);
             break;
-        case POPG:
+        }
+        case POPG: {
             sda[input] = pop();
             break;
-        case ASF:
+        }
+        case ASF: {
             push(framePointer);
             framePointer = stackPointer;
             stackPointer = stackPointer + input;
             break;
-        case RSF:
-
+        }
+        case RSF: {
             stackPointer = framePointer;
             framePointer = pop();
             break;
-        case PUSHL:
+        }
+        case PUSHL: {
             push(stack[framePointer + input]);
             break;
-        case POPL:
+        }
+
+        case POPL: {
             stack[framePointer + input] = pop();
             break;
+        }
+
         case EQ: {
-            int temp1 = pop();
-            if(temp1 == pop()){
+            if (pop() == pop()) {
                 push(1);
             } else {
                 push(0);
@@ -146,8 +192,7 @@ void executeOP(unsigned int opc){
             break;
         }
         case NE: {
-            int temp2 = pop();
-            if(temp2 != pop()){
+            if (pop() != pop()) {
                 push(1);
             } else {
                 push(0);
@@ -156,7 +201,7 @@ void executeOP(unsigned int opc){
         }
         case LT: {
             int temp3 = pop();
-            if(temp3 < pop()){
+            if(pop() < temp3){
                 push(1);
             } else {
                 push(0);
@@ -165,7 +210,7 @@ void executeOP(unsigned int opc){
         }
         case LE: {
             int temp4 = pop();
-            if(temp4 <= pop()){
+            if( pop()<= temp4){
                 push(1);
             } else {
                 push(0);
@@ -174,7 +219,7 @@ void executeOP(unsigned int opc){
         }
         case GT: {
             int temp1 = pop();
-            if(temp1 > pop()){
+            if(pop() > temp1 ){
                 push(1);
             } else {
                 push(0);
@@ -183,26 +228,30 @@ void executeOP(unsigned int opc){
         }
         case GE: {
             int temp1 = pop();
-            if(temp1 >= pop()){
+            if(pop() >= temp1){
                 push(1);
             } else {
                 push(0);
             }
             break;
         }
-        case JMP:
+        case JMP: {
             programmCounter = input;
             break;
-        case BRF:
+        }
+        case BRF: {
             if(pop() == 0){
                 programmCounter = input;
             }
             break;
-        case BRT:
+        }
+
+        case BRT: {
             if(pop() == 1){
                 programmCounter = input;
             }
             break;
+        }
         case CALL: {
             push(programmCounter);
             programmCounter = input;
@@ -222,52 +271,20 @@ void executeOP(unsigned int opc){
             push(rvr);
             break;
         }
-        case POPR:
+        case POPR: {
             rvr = pop();
             break;
+        }
         case DUP:{
             int dup = pop();
             push(dup);
             push(dup);
+            break;
         }
         default:
             break;
     }
 }
-
-/*unsigned int code1[] = {
-        (PUSHC << 24) | IMMEDIATE(3),
-        (PUSHC << 24) | IMMEDIATE(4),
-        (ADD << 24),
-        (PUSHC << 24) | IMMEDIATE(10),
-        (PUSHC << 24) | IMMEDIATE(6),
-        (SUB << 24),
-        (MUL << 24),
-        (WRINT << 24),
-        (PUSHC << 24) | IMMEDIATE(10),
-        (WRINT << 24),
-        (HALT << 24)
-};
-
-unsigned int code2[] = {
-        (PUSHC << 24) | IMMEDIATE(-2),
-        (RDINT << 24),
-        (MUL << 24),
-        (PUSHC << 24) | IMMEDIATE(3),
-        (ADD << 24),
-        (WRINT << 24),
-        (PUSHC << 24) | IMMEDIATE('\n'),
-        (WRCHR << 24),
-        (HALT << 24)
-};
-
-unsigned int code3[] = {
-        (RDCHR << 24),
-        (WRINT << 24),
-        (PUSHC << 24) | IMMEDIATE('\n'),
-        (WRCHR << 24),
-        (HALT << 24)
-};*/
 
 // executes the op code given in the *prog parameter
 void programm_exe(const unsigned int *prog){
@@ -277,22 +294,13 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
+        printf("%d\n", ins);
         programmCounter = programmCounter + 1;
         executeOP(ins);
     }
     free(code);
 }
 
-/*void execute(int p){
-    if(p == 1){
-        programm_exe(code1);
-    } else if(p == 2){
-        programm_exe(code2);
-    } else if(p == 3){
-        programm_exe(code3);
-    }
-
-}*/
 void readElements(char path[]) {
     FILE *p = fopen(path, "rb");
     int elements[4];
