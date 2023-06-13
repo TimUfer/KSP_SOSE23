@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <bigint.h>
+#include <support.h>
+#include "support.h"
+#include "bigint.h"
+
 #define HALT 0
 #define PUSHC 1
 #define ADD 2
@@ -38,12 +43,14 @@
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 #define VERSION "0"
 #define StackSize 10000
+#define number_global_vars 50
 
 typedef int Object;
 typedef struct {
     unsigned int size;
     unsigned char data[1];
 } *ObjRef;
+
 typedef struct {
     bool isObjRef;
     union {
@@ -54,7 +61,7 @@ typedef struct {
 StackSlot stack[StackSize];
 
 size_t sda_size = number_global_vars * sizeof(ObjRef);
-ObjRef **sda = malloc(sda_size);
+ObjRef *sda;
 
 int programmCounter = 0;
 int stackPointer = 0;
@@ -67,7 +74,7 @@ unsigned int* code;
 int lines;
 //Main
 
-ObjRef createObjRef(unsigned int payloadSize) {
+ObjRef createObjRef(unsigned int payloadSize, int input) {
     unsigned int objSize = sizeof(unsigned int) + payloadSize;
     ObjRef obj = (ObjRef)malloc(objSize);
 
@@ -77,17 +84,27 @@ ObjRef createObjRef(unsigned int payloadSize) {
     }
 
     obj->size = payloadSize;
+    *(int *)obj->data = input;
     return obj;
 }
 
-void push(ObjRef a){
-    stack[stackPointer] = a;
+void pushObj(ObjRef a){
+    stack[stackPointer].isObjRef = true;
+    stack[stackPointer].u.objref = a;
+    stackPointer++;
+}
+void push(int b){
+    stack[stackPointer].isObjRef = false;
+    stack[stackPointer].u.number = b;
     stackPointer++;
 }
 int pop(void){
     stackPointer--;
-    int temp = stack[stackPointer];
-    return temp;
+    return stack[stackPointer].u.number;
+}
+int popObj(void){
+    stackPointer--;
+    return stack[stackPointer].u.objref;
 }
 void print_stack(void){
     for(int i = stackPointer; i >= 0; i--){
@@ -106,60 +123,74 @@ void executeOP(unsigned int opc){
     int input = SIGN_EXTEND(opc & 0x00FFFFFF);
     switch (opcode) {
         case PUSHC: {
-            push(input);
+            bigFromInt(input);
+            pushObj(bip.res);
             break;
         }
 
         case ADD: {
-            push(pop() + pop());
+            bip.op2 = popObj();
+            bip.op1 = popObj();
+            bigAdd();
+            pushObj(bip.res);
             break;
         }
         case SUB: {
-            int t = pop();
-            push(pop() - t);
+            bip.op2 = popObj();
+            bip.op1 = popObj();
+            bigSub();
+            pushObj(bip.res);
             break;
         }
         case MUL: {
-            push(pop() * pop());
+            bip.op2 = popObj();
+            bip.op1 = popObj();
+            bigMul();
+            pushObj(bip.res);
             break;
         }
         case DIV: {
-            int t = pop();
-            push(pop() / t);
+            bip.op2 = popObj();
+            bip.op1 = popObj();
+            bigDiv();
+            pushObj(bip.res);
             break;
         }
         case MOD: {
-            int t = pop();
-            push(pop() % t);
+            bip.op2 = popObj();
+            bip.op1 = popObj();
+            bigMod();
+            pushObj(bip.res);
             break;
         }
         case RDINT: {
-            int in;
-            scanf("%d", &in);
-            push(in);
-            printf("read int");
+            bigRead(stdin);
+            pushObj(bip.res);
             break;
         }
         case WRINT: {
-            printf("%d", pop());
+            bip.op1 = popObj();
+            bigPrint(stdout);
             break;
         }
-        case RDCHR: {
+        case RDCHR: { //todo
             char in;
             scanf("%c", &in);
             push(in);
             break;
         }
         case WRCHR: {
-            printf("%c", pop());
+            bip.op1 = popObj();
+            printf("%c", (char)bigToInt());
             break;
         }
         case PUSHG: {
-            push(sda[input]);
+            pushObj(sda[input]);
             break;
         }
         case POPG: {
-            sda[input] = pop();
+            bip.op1 = popObj();
+            sda[input] = bip.op1;
             break;
         }
         case ASF: {
@@ -174,64 +205,96 @@ void executeOP(unsigned int opc){
             break;
         }
         case PUSHL: {
-            push(stack[framePointer + input]);
+            push(stack[framePointer + input].u.objref);
             break;
         }
 
         case POPL: {
-            stack[framePointer + input] = pop();
+            stack[framePointer + input].u.objref = popObj();
             break;
         }
 
         case EQ: {
-            if (pop() == pop()) {
-                push(1);
-            } else {
-                push(0);
+            int tmp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            tmp = bigCmp();
+            if(tmp == 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else{
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
         case NE: {
-            if (pop() != pop()) {
-                push(1);
-            } else {
-                push(0);
+            int temp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            temp = bigCmp();
+            if(temp != 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else {
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
         case LT: {
-            int temp3 = pop();
-            if(pop() < temp3){
-                push(1);
-            } else {
-                push(0);
+            int temp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            temp = bigCmp();
+            if(temp < 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else {
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
         case LE: {
-            int temp4 = pop();
-            if( pop()<= temp4){
-                push(1);
-            } else {
-                push(0);
+            int temp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            temp = bigCmp();
+            if(temp <= 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else {
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
         case GT: {
-            int temp1 = pop();
-            if(pop() > temp1 ){
-                push(1);
-            } else {
-                push(0);
+            int temp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            temp = bigCmp();
+            if(temp > 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else {
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
         case GE: {
-            int temp1 = pop();
-            if(pop() >= temp1){
-                push(1);
-            } else {
-                push(0);
+            int temp;
+            bip.op2 = pop();
+            bip.op1 = pop();
+            temp = bigCmp();
+            if(temp >= 0){
+                bigFromInt(true);
+                push(bip.res);
+            }else {
+                bigFromInt(false);
+                push(bip.res);
             }
             break;
         }
@@ -240,14 +303,21 @@ void executeOP(unsigned int opc){
             break;
         }
         case BRF: {
-            if(pop() == 0){
+            int temp;
+            bip.op1 = pop();
+            temp = bigToInt();
+            if(temp == false){
                 programmCounter = input;
             }
+
             break;
         }
 
         case BRT: {
-            if(pop() == 1){
+            int temp;
+            bip.op1 = pop();
+            temp = bigToInt();
+            if(temp == true){
                 programmCounter = input;
             }
             break;
@@ -268,17 +338,17 @@ void executeOP(unsigned int opc){
             break;
         }
         case PUSHR: {
-            push(rvr);
+            pushObj(rvr);
             break;
         }
         case POPR: {
-            rvr = pop();
+            rvr = popObj();
             break;
         }
         case DUP:{
-            int dup = pop();
-            push(dup);
-            push(dup);
+            ObjRef dup = popObj();
+            pushObj(dup);
+            pushObj(dup);
             break;
         }
         default:
@@ -294,7 +364,6 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
-        printf("%d\n", ins);
         programmCounter = programmCounter + 1;
         executeOP(ins);
     }
@@ -372,6 +441,7 @@ int main(int argc, char* argv[]) {
             exit(0);
         } else{
             printf("Ninja Virtual Machine started\n");
+            sda = malloc(sda_size);
             readExecuteFile(argv[1]);
             programm_exe(code);
             printf("Ninja Virtual Machine stopped\n");
