@@ -88,6 +88,28 @@ ObjRef createObjRef(unsigned int payloadSize, int input) {
     return obj;
 }
 
+ObjRef newPrimObject(int dataSize) { // todo richtige size
+    ObjRef objRef;
+    int size;
+    size = sizeof(*objRef) + dataSize * sizeof(char);
+    if(objRef == NULL){
+        printf("ERROR: newPrim no Mem \n")
+    }
+    objRef = malloc(size);
+    objRef->size = dataSize;
+    return objRef;
+}
+
+void * getPrimObjectDataPointer(void * obj){
+    ObjRef oo = ((ObjRef) (obj));
+    return oo->data;
+}
+
+void fatalError(char *msg){
+    printf("Fatal Error: %s \n", msg)
+    exit(1);
+}
+
 void pushObj(ObjRef a){
     stack[stackPointer].isObjRef = true;
     stack[stackPointer].u.objref = a;
@@ -158,9 +180,15 @@ void executeOP(unsigned int opc){
         }
         case MOD: {
             bip.op2 = popObj();
+            bigFromInt(0);
+            bip.op1 = bip.res;
+            if(bigCmp() == 0){
+                perror("Cant do Mod with 0\n");
+                exit(1);
+            }
             bip.op1 = popObj();
-            bigMod();
-            pushObj(bip.res);
+            bigDiv();
+            pushObj(bip.rem);
             break;
         }
         case RDINT: {
@@ -173,10 +201,11 @@ void executeOP(unsigned int opc){
             bigPrint(stdout);
             break;
         }
-        case RDCHR: { //todo
+        case RDCHR: {
             char in;
             scanf("%c", &in);
-            push(in);
+            bigFromInt(in);
+            pushObj(bip.res);
             break;
         }
         case WRCHR: {
