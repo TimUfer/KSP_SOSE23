@@ -58,10 +58,9 @@ typedef struct {
         int number;
     } u;
 } StackSlot;
-StackSlot stack[StackSize];
-
-size_t sda_size = number_global_vars * sizeof(ObjRef);
+StackSlot *stack;
 ObjRef *sda;
+
 
 int programmCounter = 0;
 int stackPointer = 0;
@@ -73,7 +72,7 @@ ObjRef rvr;
 unsigned int* code;
 int lines;
 //Main
-
+/*
 ObjRef createObjRef(unsigned int payloadSize, int input) {
     unsigned int objSize = sizeof(unsigned int) + payloadSize;
     ObjRef obj = (ObjRef)malloc(objSize);
@@ -86,16 +85,17 @@ ObjRef createObjRef(unsigned int payloadSize, int input) {
     obj->size = payloadSize;
     *(int *)obj->data = input;
     return obj;
-}
+}*/
 
 ObjRef newPrimObject(int dataSize) { // todo richtige size
     ObjRef objRef;
     int size;
     size = sizeof(*objRef) + dataSize * sizeof(char);
-    if(objRef == NULL){
-        printf("ERROR: newPrim no Mem \n")
-    }
     objRef = malloc(size);
+    if(objRef == NULL){
+        printf("ERROR: newPrim no Mem \n");
+    }
+
     objRef->size = dataSize;
     return objRef;
 }
@@ -106,7 +106,7 @@ void * getPrimObjectDataPointer(void * obj){
 }
 
 void fatalError(char *msg){
-    printf("Fatal Error: %s \n", msg)
+    printf("Fatal Error: %s \n", msg);
     exit(1);
 }
 
@@ -380,8 +380,10 @@ void executeOP(unsigned int opc){
             pushObj(dup);
             break;
         }
-        default:
+        default: {
+            fatalError("Invalid opcode");
             break;
+        }
     }
 }
 
@@ -393,6 +395,7 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
+        printf("%d\n",oc);
         programmCounter = programmCounter + 1;
         executeOP(ins);
     }
@@ -470,7 +473,9 @@ int main(int argc, char* argv[]) {
             exit(0);
         } else{
             printf("Ninja Virtual Machine started\n");
-            sda = malloc(sda_size);
+            stack = malloc(StackSize);
+            sda = malloc(number_global_vars * sizeof(unsigned int));
+
             readExecuteFile(argv[1]);
             programm_exe(code);
             printf("Ninja Virtual Machine stopped\n");
