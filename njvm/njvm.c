@@ -87,7 +87,7 @@ ObjRef createObjRef(unsigned int payloadSize, int input) {
     return obj;
 }*/
 
-ObjRef newPrimObject(int dataSize) { // todo richtige size
+void * newPrimObject(int dataSize) { // todo richtige size
     ObjRef objRef;
     int size;
     size = sizeof(unsigned int) + dataSize * sizeof(char);
@@ -151,6 +151,7 @@ void print_stack(void){
 
 
 void executeOP(unsigned int opc){
+    printf("exec");
     unsigned int opcode = opc >> 24;
     int input = SIGN_EXTEND(opc & 0x00FFFFFF);
     switch (opcode) {
@@ -159,7 +160,6 @@ void executeOP(unsigned int opc){
             pushObj(bip.res);
             break;
         }
-
         case ADD: {
             bip.op2 = popObj();
             bip.op1 = popObj();
@@ -206,7 +206,8 @@ void executeOP(unsigned int opc){
             pushObj(bip.res);
             break;
         }
-        case WRINT: {
+        case WRINT: { //todo wird nicht ausgeführt jb
+            printf("wrint");
             bip.op1 = popObj();
             bigPrint(stdout);
             break;
@@ -405,9 +406,13 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
-        printf("%d\n",oc);
+        printf("soll ausgeführt werden: %d\n",oc);
+        printf("pre progcount: %d\n", programmCounter);
         programmCounter = programmCounter + 1;
+        printf("post progcount: %d\n", programmCounter);
+
         executeOP(ins);
+        printf("wurde ausgeführt: %d\n",oc);
     }
     free(code);
 }
