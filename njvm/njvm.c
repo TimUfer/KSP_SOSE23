@@ -91,8 +91,7 @@ ObjRef newPrimObject(int dataSize) { // todo richtige size
     ObjRef objRef;
     int size;
     size = sizeof(unsigned int) + dataSize * sizeof(char);
-    objRef = malloc(size);
-    if((objRef = malloc(size);) == NULL){
+    if((objRef = malloc(size)) == NULL){
         printf("ERROR: newPrim no Mem \n");
     }
 
@@ -114,8 +113,8 @@ ObjRef cmpObj(int datasize){
     ObjRef cmpObj;
     unsigned int objSize;
     objSize = sizeof(*cmpObj) + (datasize * sizeof(void*));
-    id((cmpObj = malloc(objSize)) == NULL){
-        perror("Error cmpObj malloc")
+    if((cmpObj = malloc(objSize)) == NULL){
+        perror("Error cmpObj malloc");
     }
     cmpObj->size = datasize;
     return cmpObj;
