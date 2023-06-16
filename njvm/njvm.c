@@ -65,9 +65,6 @@ ObjRef *sda;
 int programmCounter = 0;
 int stackPointer = 0;
 int framePointer = 0;
-//int stack[StackSize];
-//int sda[50];
-//int rvr;
 ObjRef rvr;
 unsigned int* code;
 int lines;
@@ -87,16 +84,16 @@ ObjRef createObjRef(unsigned int payloadSize, int input) {
     return obj;
 }*/
 
-void * newPrimObject(int dataSize) { // todo richtige size
-    ObjRef objRef;
-    int size;
-    size = sizeof(unsigned int) + dataSize * sizeof(char);
-    if((objRef = malloc(size)) == NULL){
-        printf("ERROR: newPrim no Mem \n");
-    }
+void * newPrimObject(int dataSize) {
+    ObjRef bigObjRef;
 
-    objRef->size = dataSize;
-    return objRef;
+    bigObjRef = malloc(sizeof(unsigned int) +
+                       dataSize * sizeof(unsigned char));
+    if (bigObjRef == NULL) {
+        fatalError("newPrimObject() got no memory");
+    }
+    bigObjRef->size = dataSize;
+    return bigObjRef;
 }
 
 void * getPrimObjectDataPointer(void * obj){
@@ -134,7 +131,7 @@ int pop(void){
     stackPointer--;
     return stack[stackPointer].u.number;
 }
-int popObj(void){
+ObjRef popObj(void){
     stackPointer--;
     return stack[stackPointer].u.objref;
 }
@@ -151,10 +148,15 @@ void print_stack(void){
 
 
 void executeOP(unsigned int opc){
-    printf("exec");
+
     unsigned int opcode = opc >> 24;
     int input = SIGN_EXTEND(opc & 0x00FFFFFF);
     switch (opcode) {
+        case HALT: {
+            printf("Ninja Virtual Machine stopped\n");
+            exit(0);
+            break;
+        }
         case PUSHC: {
             bigFromInt(input);
             pushObj(bip.res);
@@ -207,7 +209,6 @@ void executeOP(unsigned int opc){
             break;
         }
         case WRINT: { //todo wird nicht ausgeführt jb
-            printf("wrint");
             bip.op1 = popObj();
             bigPrint(stdout);
             break;
@@ -245,7 +246,7 @@ void executeOP(unsigned int opc){
             break;
         }
         case PUSHL: {
-            push(stack[framePointer + input].u.objref);
+            pushObj(stack[framePointer + input].u.objref);
             break;
         }
 
@@ -256,85 +257,85 @@ void executeOP(unsigned int opc){
 
         case EQ: {
             int tmp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             tmp = bigCmp();
             if(tmp == 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else{
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
         case NE: {
             int temp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             temp = bigCmp();
             if(temp != 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else {
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
         case LT: {
             int temp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             temp = bigCmp();
             if(temp < 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else {
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
         case LE: {
             int temp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             temp = bigCmp();
             if(temp <= 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else {
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
         case GT: {
             int temp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             temp = bigCmp();
             if(temp > 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else {
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
         case GE: {
             int temp;
-            bip.op2 = pop();
-            bip.op1 = pop();
+            bip.op2 = popObj();
+            bip.op1 = popObj();
             temp = bigCmp();
             if(temp >= 0){
                 bigFromInt(true);
-                push(bip.res);
+                pushObj(bip.res);
             }else {
                 bigFromInt(false);
-                push(bip.res);
+                pushObj(bip.res);
             }
             break;
         }
@@ -344,7 +345,7 @@ void executeOP(unsigned int opc){
         }
         case BRF: {
             int temp;
-            bip.op1 = pop();
+            bip.op1 = popObj();
             temp = bigToInt();
             if(temp == false){
                 programmCounter = input;
@@ -355,7 +356,7 @@ void executeOP(unsigned int opc){
 
         case BRT: {
             int temp;
-            bip.op1 = pop();
+            bip.op1 = popObj();
             temp = bigToInt();
             if(temp == true){
                 programmCounter = input;
@@ -406,13 +407,8 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
-        printf("soll ausgeführt werden: %d\n",oc);
-        printf("pre progcount: %d\n", programmCounter);
         programmCounter = programmCounter + 1;
-        printf("post progcount: %d\n", programmCounter);
-
         executeOP(ins);
-        printf("wurde ausgeführt: %d\n",oc);
     }
     free(code);
 }
@@ -493,7 +489,7 @@ int main(int argc, char* argv[]) {
 
             readExecuteFile(argv[1]);
             programm_exe(code);
-            printf("Ninja Virtual Machine stopped\n");
+
         }
     }
     return 0;
