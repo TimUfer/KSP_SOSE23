@@ -409,7 +409,7 @@ void executeOP(unsigned int opc){
             break;
         }
         case NEW: {
-            ObjRef o = cmpObj(input);
+            ObjRef o = newCompoundObject(input);
             pushObj(o);
         }
         case GETF: {
