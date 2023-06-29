@@ -39,8 +39,24 @@
 #define PUSHR 29
 #define POPR 30
 #define DUP 31
+#define NEW 32
+#define GETF 33
+#define PUTF 34
+#define NEWA 35
+#define GETFA 36
+#define PUTFA 37
+#define GETSZ 38
+#define PUSHN 39
+#define REFEQ 40
+#define REFNE 41
+
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
+#define MSB (1 << (8 * sizeof(unsigned int) - 1))
+#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
+#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
+#define GET_REFS_PTR(objRef) ((ObjRef *) (objRef)->data)
+
 #define VERSION "0"
 #define StackSize 10000
 #define number_global_vars 50
@@ -106,14 +122,14 @@ void fatalError(char *msg){
     exit(1);
 }
 
-ObjRef cmpObj(int datasize){
+ObjRef newCompoundObject(int numObjRefs){
     ObjRef cmpObj;
     unsigned int objSize;
-    objSize = sizeof(*cmpObj) + (datasize * sizeof(void*));
+    objSize = sizeof(unsigned int) + (numObjRefs * sizeof(void*));
     if((cmpObj = malloc(objSize)) == NULL){
         perror("Error cmpObj malloc");
     }
-    cmpObj->size = datasize;
+    cmpObj->size = numObjRefs; // MSB
     return cmpObj;
 }
 
@@ -208,7 +224,7 @@ void executeOP(unsigned int opc){
             pushObj(bip.res);
             break;
         }
-        case WRINT: { //todo wird nicht ausgeführt jb
+        case WRINT: {
             bip.op1 = popObj();
             bigPrint(stdout);
             break;
@@ -391,6 +407,21 @@ void executeOP(unsigned int opc){
             pushObj(dup);
             pushObj(dup);
             break;
+        }
+        case NEW: {
+            ObjRef o = cmpObj(input);
+            pushObj(o);
+        }
+        case GETF: {
+            bip.op1 = popObj();
+            if(!IS_PRIMITIVE(bip.op1) && GET_ELEMENT_COUNT(bip.op1) > input){
+                pushObj(GET_REFS_PTR(bip.op1)[input]); // pushOBJ ?
+            } else {
+                fatalError("ERROR: GETF\n");
+            }
+        }
+        case PUTF: {
+            GET_REFS_PTR(popObj())[] = input;
         }
         default: {
             fatalError("Invalid opcode");
