@@ -52,10 +52,7 @@
 
 #define IMMEDIATE(x) ((x) & 0x00FFFFFF)
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
-#define MSB (1 << (8 * sizeof(unsigned int) - 1))
-#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
-#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
-#define GET_REFS_PTR(objRef) ((ObjRef *) (objRef)->data)
+
 
 #define VERSION "0"
 #define StackSize 10000
@@ -77,6 +74,10 @@ typedef struct {
 StackSlot *stack;
 ObjRef *sda;
 
+#define MSB (1 << (8 * sizeof(unsigned int) - 1))
+#define IS_PRIMITIVE(objRef) (((objRef)->size & MSB) == 0)
+#define GET_ELEMENT_COUNT(objRef) ((objRef)->size & ~MSB)
+#define GET_REFS_PTR(objRef) ((ObjRef *) (objRef)->data)
 
 int programmCounter = 0;
 int stackPointer = 0;
@@ -129,7 +130,7 @@ ObjRef newCompoundObject(int numObjRefs){
     if((cmpObj = malloc(objSize)) == NULL){
         perror("Error cmpObj malloc");
     }
-    cmpObj->size = numObjRefs; // MSB
+    cmpObj->size = (unsigned int) (numObjRefs|MSB); // MSB
     return cmpObj;
 }
 
@@ -161,6 +162,7 @@ void print_stack(void){
         printf("'-------+-------'\n\n");
     }
 }
+
 
 
 void executeOP(unsigned int opc){
@@ -417,14 +419,68 @@ void executeOP(unsigned int opc){
             if(!IS_PRIMITIVE(bip.op1) && GET_ELEMENT_COUNT(bip.op1) > input){
                 pushObj(GET_REFS_PTR(bip.op1)[input]); // pushOBJ ?
             } else {
-                fatalError("ERROR: GETF\n");
+                fatalError("ERROR: GETF no cmpobj ontop of stack\n");
             }
         }
         case PUTF: {
-            GET_REFS_PTR(popObj())[] = input;
+            bip.op1 = popObj();
+            bip.op2 = popObj();
+            GET_REFS_PTR(bip.op2)[input] = bip.op1;
+        }
+        case NEWA: {
+            bip.op1 = popObj();
+            if(IS_PRIMITIVE(bip.op1)){
+                ObjRef cmpObj = newCompoundObject(bigToInt());
+                pushObj(cmpObj);
+            } else {
+                fatalError("Object ontop of stack is ot primitive\n");
+            }
+        }
+        case GETFA: {
+            bip.op1 = popObj();
+            ObjRef  a = popObj();
+            pushObj(GET_REFS_PTR(a)[bigToInt()]);
+        }
+        case PUTFA: {
+            ObjRef value = popObj();
+            bip.op1 = popObj();
+            ObjRef array = popObj();
+            GET_REFS_PTR(array)[bigToInt()] = value;
+        }
+        case GETSZ: {
+            ObjRef tmp = popObj();
+            if(IS_PRIMITIVE(tmp)){
+                bigFromInt(-1);
+            } else{
+                bigFromInt(GET_ELEMENT_COUNT(tmp));
+            }
+            pushObj(bip.res);
+        }
+        case PUSHN: {
+            pushObj(NULL);
+        }
+        case REFEQ: {
+            ObjRef a = popObj();
+            ObjRef b = popObj();
+            if(a == b){
+                bigFromInt(1);
+            } else{
+                bigFromInt(0);
+            }
+            pushObj(bip.res);
+        }
+        case REFNE: {
+            ObjRef a = popObj();
+            ObjRef b = popObj();
+            if(a != b){
+                bigFromInt(1);
+            } else{
+                bigFromInt(0);
+            }
+            pushObj(bip.res);
         }
         default: {
-            fatalError("Invalid opcode");
+            fatalError("Invalid opcode\n");
             break;
         }
     }
