@@ -54,7 +54,7 @@
 #define SIGN_EXTEND(i) ((i) & 0x00800000 ? (i) | 0xFF000000 : (i))
 
 
-#define VERSION "0"
+#define VERSION "7"
 #define StackSize 10000
 #define number_global_vars 50
 
@@ -132,6 +132,9 @@ ObjRef newCompoundObject(int numObjRefs){
         perror("Error cmpObj malloc");
     }
     cmpObj->size = (numObjRefs|MSB); // MSB
+    for(int i = 0; i < numObjRefs; i++){
+        GET_REFS_PTR(cmpObj)[i] = NULL;
+    }
     return cmpObj;
 }
 
@@ -158,7 +161,7 @@ void print_stack(void){
         if(i == stackPointer){
             printf("|stackPointer->%3d| <empty>|\n", i);
         } else {
-            printf("|%7d|  %5d|\n", i, stack[i]);
+            printf("|%7d|  %5d|\n", i, stack[i].u.number);
         }
         printf("'-------+-------'\n\n");
     }
@@ -543,7 +546,7 @@ void readExecuteFile(char path[]){
 
     int elements = lines+4;
     size_t read_len;
-    unsigned int buffer[250];
+    unsigned int buffer[1000];
 
 
     if(pF == NULL){
