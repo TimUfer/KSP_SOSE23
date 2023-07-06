@@ -170,7 +170,6 @@ void executeOP(unsigned int opc){
 
     unsigned int opcode = opc >> 24;
     int input = SIGN_EXTEND(opc & 0x00FFFFFF);
-    printf("to exec %d\n", opcode);
     switch (opcode) {
         case 0: {
             printf("Ninja Virtual Machine stopped\n");
@@ -271,7 +270,6 @@ void executeOP(unsigned int opc){
         }
 
         case POPL: {
-            printf("popl\n");
             stack[framePointer + input].u.objref = popObj();
             break;
         }
@@ -416,19 +414,23 @@ void executeOP(unsigned int opc){
         case NEW: {
             ObjRef o = newCompoundObject(input);
             pushObj(o);
+            break;
+
         }
         case GETF: {
             ObjRef a = popObj();
-            if(!IS_PRIMITIVE(a) && GET_ELEMENT_COUNT(a) > input){
-                pushObj(GET_REFS_PTR(a)[input]); // pushOBJ ?
+            if(IS_PRIMITIVE(a) == 0 && GET_ELEMENT_COUNT(a) > input){
+                pushObj(GET_REFS_PTR(a)[input]);
             } else {
                 fatalError("ERROR: GETF no cmpobj ontop of stack\n");
             }
+            break;
         }
         case PUTF: {
             ObjRef a = popObj();
             ObjRef b = popObj();
             GET_REFS_PTR(b)[input] = a;
+            break;
         }
         case NEWA: {
             ObjRef obj = popObj();
@@ -439,17 +441,20 @@ void executeOP(unsigned int opc){
             } else {
                 fatalError("Object ontop of stack is ot primitive\n");
             }
+            break;
         }
         case GETFA: {
             bip.op1 = popObj();
             ObjRef  a = popObj();
             pushObj(GET_REFS_PTR(a)[bigToInt()]);
+            break;
         }
         case PUTFA: {
             ObjRef value = popObj();
             bip.op1 = popObj();
             ObjRef array = popObj();
             GET_REFS_PTR(array)[bigToInt()] = value;
+            break;
         }
         case GETSZ: {
             ObjRef tmp = popObj();
@@ -459,10 +464,11 @@ void executeOP(unsigned int opc){
                 bigFromInt(GET_ELEMENT_COUNT(tmp));
             }
             pushObj(bip.res);
+            break;
         }
         case PUSHN: {
             pushObj(NULL);
-            printf("pushn done\n");
+            break;
         }
         case REFEQ: {
             ObjRef a = popObj();
@@ -473,6 +479,7 @@ void executeOP(unsigned int opc){
                 bigFromInt(0);
             }
             pushObj(bip.res);
+            break;
         }
         case REFNE: {
             ObjRef a = popObj();
@@ -483,11 +490,10 @@ void executeOP(unsigned int opc){
                 bigFromInt(0);
             }
             pushObj(bip.res);
+            break;
         }
         default: {
-            printf("%d\n", input);
-            fatalError("Invalid opcode\n");
-            break;
+            printf("default");
         }
     }
 }
@@ -500,10 +506,8 @@ void programm_exe(const unsigned int *prog){
     while(oc != HALT) {
         ins = prog[programmCounter];
         oc = prog[programmCounter] >> 24;
-        printf("%d\n", oc);
         programmCounter = programmCounter + 1;
         executeOP(ins);
-        printf("done exec\n");
     }
     free(code);
 }
