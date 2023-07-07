@@ -55,7 +55,12 @@
 
 
 #define VERSION "7"
-#define StackSize 10000
+unsigned int StackSize = (unsigned int)(64 * 1024);
+unsigned int heapSize = 8192 * 1024;
+char* heap;
+char* halfPointer;
+char* freePointer;
+
 #define number_global_vars 50
 
 typedef int Object;
@@ -83,8 +88,8 @@ int programmCounter = 0;
 int stackPointer = 0;
 int framePointer = 0;
 ObjRef rvr = NULL;
-unsigned int* code;
-int lines;
+unsigned int* code = NULL;
+int lines = 0;
 //Main
 /*
 ObjRef createObjRef(unsigned int payloadSize, int input) {
@@ -101,10 +106,27 @@ ObjRef createObjRef(unsigned int payloadSize, int input) {
     return obj;
 }*/
 
+
+
+void heapInit(){
+    heap = malloc(heapSize * sizeof(unsigned char));
+    freePointer = heap;
+    halfPointer = freePointer + (heapSize / 2);
+}
+
+void * alloc(int size){
+    if(freePointer + size > halfPointer){
+        printf("no mem(alloc)\n");
+        exit(1); //todo gc
+    }
+    freePointer = freePointer + size;
+    return freePointer - size;
+}
+
 void * newPrimObject(int dataSize) {
     ObjRef bigObjRef;
 
-    bigObjRef = malloc(sizeof(unsigned int) +
+    bigObjRef = alloc(sizeof(unsigned int) +
                        dataSize * sizeof(unsigned char));
     if (bigObjRef == NULL) {
         fatalError("newPrimObject() got no memory");
@@ -128,7 +150,7 @@ ObjRef newCompoundObject(int numObjRefs){
     unsigned int objSize;
     objSize = sizeof(unsigned int) +
               numObjRefs * sizeof(unsigned char);
-    if((cmpObj = malloc(objSize)) == NULL){
+    if((cmpObj = alloc(objSize)) == NULL){
         perror("Error cmpObj malloc");
     }
     cmpObj->size = (numObjRefs|MSB); // MSB
@@ -580,6 +602,15 @@ int main(int argc, char* argv[]) {
         if (strcmp(argv[1], "--version") == 0) {
             printf("Version: " VERSION"\n");
             exit(0);
+        } else if(strcmp(argv[1], "--stack") == 0) {
+            if(argv[2] == NULL){
+                StackSize = (unsigned int)(64 * 1024);
+            } else {
+                StackSize = strtol(argv[2], NULL, 10) * 1024;
+                printf("%d\n", StackSize);
+            }
+        } else if(strcmp(argv[1], "--heap") == 0){
+            heapSize = strtol(argv[2], NULL, 10) * 1024;
         } else if (strcmp(argv[1], "--help") == 0) {
             printf("    --version    shows version and exit\n");
             printf("    --help       shows help and exit\n");
@@ -588,6 +619,7 @@ int main(int argc, char* argv[]) {
             printf("Ninja Virtual Machine started\n");
             stack = malloc(StackSize);
             sda = malloc(number_global_vars * sizeof(unsigned int));
+            heapInit();
 
             readExecuteFile(argv[1]);
             programm_exe(code);
