@@ -597,34 +597,71 @@ void readExecuteFile(char path[]){
 
 }
 
+
+
 int main(int argc, char* argv[]) {
-    if (argc == 2) {
-        if (strcmp(argv[1], "--version") == 0) {
-            printf("Version: " VERSION"\n");
-            exit(0);
-        } else if(strcmp(argv[1], "--stack") == 0) {
-            if(argv[2] == NULL){
-                StackSize = (unsigned int)(64 * 1024);
-            } else {
-                StackSize = strtol(argv[2], NULL, 10) * 1024;
-                printf("%d\n", StackSize);
+
+        for(int i = 0; i <= argc; ++i){
+            if(i == 1 && strcmp(argv[i], "--version")==0){
+                printf("Version: " VERSION"\n");
+                exit(0);
+            } else
+            if(i == 1 && strcmp(argv[i], "--stack") == 0){
+                StackSize = strtol(argv[i+1], NULL, 10) * 1024;
+                printf("Ninja Virtual Machine started\n");
+                stack = malloc(StackSize);
+                sda = malloc(number_global_vars * sizeof(unsigned int));
+                heapInit();
+
+                readExecuteFile(argv[i+2]);
+                programm_exe(code);
+
+            } else if(i == 1 && strcmp(argv[i], "--heap") == 0){
+                printf("Ninja Virtual Machine started\n");
+                stack = malloc(StackSize);
+                sda = malloc(number_global_vars * sizeof(unsigned int));
+                heapSize = strtol(argv[i+1], NULL, 10) * 1024;
+                heapInit();
+
+                readExecuteFile(argv[i+2]);
+                programm_exe(code);
+
+            } else if(i == 1){
+                printf("Ninja Virtual Machine started\n");
+                stack = malloc(StackSize);
+                sda = malloc(number_global_vars * sizeof(unsigned int));
+                heapInit();
+                readExecuteFile(argv[1]);
+                programm_exe(code);
             }
-        } else if(strcmp(argv[1], "--heap") == 0){
-            heapSize = strtol(argv[2], NULL, 10) * 1024;
-        } else if (strcmp(argv[1], "--help") == 0) {
-            printf("    --version    shows version and exit\n");
-            printf("    --help       shows help and exit\n");
-            exit(0);
-        } else{
-            printf("Ninja Virtual Machine started\n");
-            stack = malloc(StackSize);
-            sda = malloc(number_global_vars * sizeof(unsigned int));
-            heapInit();
-
-            readExecuteFile(argv[1]);
-            programm_exe(code);
-
         }
-    }
+
     return 0;
 }
+/*
+if (strcmp(argv[1], "--version") == 0) {
+printf("Version: " VERSION"\n");
+exit(0);
+} else if(strcmp(argv[1], "--stack") == 0) {
+if(argv[2] == NULL){
+StackSize = (unsigned int)(64 * 1024);
+} else {
+StackSize = strtol(argv[2], NULL, 10) * 1024;
+printf("%d\n", StackSize);
+}
+} else if(strcmp(argv[1], "--heap") == 0){
+heapSize = strtol(argv[2], NULL, 10) * 1024;
+} else if (strcmp(argv[1], "--help") == 0) {
+printf("    --version    shows version and exit\n");
+printf("    --help       shows help and exit\n");
+exit(0);
+} else{
+printf("Ninja Virtual Machine started\n");
+stack = malloc(StackSize);
+sda = malloc(number_global_vars * sizeof(unsigned int));
+heapInit();
+
+readExecuteFile(argv[1]);
+programm_exe(code);
+
+}*/
