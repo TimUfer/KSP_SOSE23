@@ -148,8 +148,8 @@ void fatalError(char *msg){
 ObjRef newCompoundObject(int numObjRefs){
     ObjRef cmpObj;
     unsigned int objSize;
-    objSize = sizeof(unsigned int) +
-              numObjRefs * sizeof(unsigned char);
+    objSize = sizeof(*cmpObj) +
+              numObjRefs * sizeof(ObjRef);
     if((cmpObj = alloc(objSize)) == NULL){
         perror("Error cmpObj malloc");
     }
@@ -599,6 +599,7 @@ void readExecuteFile(char path[]){
 
 
 
+
 int main(int argc, char* argv[]) {
 
         for(int i = 0; i <= argc; ++i){
@@ -607,14 +608,25 @@ int main(int argc, char* argv[]) {
                 exit(0);
             } else
             if(i == 1 && strcmp(argv[i], "--stack") == 0){
-                StackSize = strtol(argv[i+1], NULL, 10) * 1024;
-                printf("Ninja Virtual Machine started\n");
-                stack = malloc(StackSize);
-                sda = malloc(number_global_vars * sizeof(unsigned int));
-                heapInit();
+                if(strcmp(argv[i+2], "--heap") == 0){
+                    StackSize = strtol(argv[i+1], NULL, 10) * 1024;
+                    heapSize = strtol(argv[i+3], NULL, 10) * 1024;
+                    printf("Ninja Virtual Machine started\n");
+                    stack = malloc(StackSize);
+                    sda = malloc(number_global_vars * sizeof(unsigned int));
+                    heapInit();
+                    readExecuteFile(argv[i+4]);
+                    programm_exe(code);
+                }else {
+                    StackSize = strtol(argv[i+1], NULL, 10) * 1024;
+                    printf("Ninja Virtual Machine started\n");
+                    stack = malloc(StackSize);
+                    sda = malloc(number_global_vars * sizeof(unsigned int));
+                    heapInit();
 
-                readExecuteFile(argv[i+2]);
-                programm_exe(code);
+                    readExecuteFile(argv[i+2]);
+                    programm_exe(code);
+                }
 
             } else if(i == 1 && strcmp(argv[i], "--heap") == 0){
                 printf("Ninja Virtual Machine started\n");

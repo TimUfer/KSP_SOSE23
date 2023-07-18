@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="0fb600e2-4afb-43bc-a698-63a0c3477e32" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/njvm/njvm" beforeDir="false" afterPath="$PROJECT_DIR$/njvm/njvm" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/njvm/njvm.c" beforeDir="false" afterPath="$PROJECT_DIR$/njvm/njvm.c" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2PESFGElwq8G9fCfnxdBYsYcJG9" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/tim/Dokumente/KSP/KSP_Abgabe1&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="0fb600e2-4afb-43bc-a698-63a0c3477e32" name="Changes" comment="" />
+      <created>1683020642881</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1683020642881</updated>
+      <workItem from="1683020644645" duration="1431000" />
+      <workItem from="1683109354547" duration="2156000" />
+      <workItem from="1683271191680" duration="9365000" />
+      <workItem from="1683533756752" duration="3078000" />
+      <workItem from="1683616831544" duration="2756000" />
+      <workItem from="1683626837386" duration="77000" />
+      <workItem from="1683877632929" duration="2404000" />
+      <workItem from="1683889306030" duration="2767000" />
+      <workItem from="1684150980859" duration="637000" />
+      <workItem from="1684315482546" duration="326000" />
+      <workItem from="1684319480284" duration="2305000" />
+      <workItem from="1684483552397" duration="7074000" />
+      <workItem from="1684918470277" duration="1585000" />
+      <workItem from="1684928007603" duration="28000" />
+      <workItem from="1684935751574" duration="252000" />
+      <workItem from="1685001015437" duration="5114000" />
+      <workItem from="1685006844977" duration="5166000" />
+      <workItem from="1685014958745" duration="3535000" />
+      <workItem from="1685089607387" duration="5348000" />
+      <workItem from="1685345484261" duration="3087000" />
+      <workItem from="1685611504178" duration="2716000" />
+      <workItem from="1685868683347" duration="2657000" />
+      <workItem from="1685960371322" duration="6000" />
+      <workItem from="1686212807981" duration="9381000" />
+      <workItem from="1686569775549" duration="144000" />
+      <workItem from="1686656461408" duration="989000" />
+      <workItem from="1686722702813" duration="8335000" />
+      <workItem from="1686743560613" duration="1572000" />
+      <workItem from="1686821436167" duration="3060000" />
+      <workItem from="1686900936335" duration="3248000" />
+      <workItem from="1686904314483" duration="17000" />
+      <workItem from="1687429361755" duration="601000" />
+      <workItem from="1687938940534" duration="2676000" />
+      <workItem from="1688025459660" duration="745000" />
+      <workItem from="1688113189320" duration="7172000" />
+      <workItem from="1688536338479" duration="5073000" />
+      <workItem from="1688636389565" duration="5868000" />
+      <workItem from="1688715706694" duration="13277000" />
+      <workItem from="1688968567755" duration="48000" />
+      <workItem from="1689067740583" duration="146000" />
+      <workItem from="1689146887493" duration="1490000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/njvm/njvm.c</url>
+          <line>461</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
